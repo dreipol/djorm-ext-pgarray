@@ -83,13 +83,16 @@ class ArrayFormField(forms.Field):
 
     def clean(self, value):
         try:
-            return value.split(self.delim)
+            value = value.split(self.delim)
+            if (self._conversion_function is not None and value is not None):
+                value = [self._conversion_function(v) for v in value]
+            return value
         except:
             raise ValidationError(self.error_messages['invalid'])
 
     def prepare_value(self, value):
         if value:
-            return self.delim.join(value)
+            return self.delim.join(str(item) for item in value)
         else:
             return super(ArrayFormField, self).prepare_value(value)
 
